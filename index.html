@@ -6,44 +6,61 @@
   <title>中国象棋 | Xiangqi</title>
   <style>
     :root{
-      --board-bg:#f3e7d3; /* rice paper */
-      --board-line:#7a5c3a;
-      --river:#b3d4fc;
-      --red:#c0392b;
+      --board-bg:#d7b88a; /* wood-ish */
+      --board-line:#6b4e2e;
+      --river:#7ec8e3;
+      --red:#bf2c23;
       --black:#2c3e50;
       --hint:#2ecc71;
       --select:#f39c12;
+      --ink:#2b2118;
+      --light-wood:#f4e3c3;
+      --mid-wood:#ddb786;
+      --dark-wood:#b07d4e;
     }
-    html,body{height:100%;margin:0;font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#f7f5f0;}
-    .app{max-width:980px;margin:12px auto;padding:12px;}
+    html,body{height:100%;margin:0;font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:linear-gradient(180deg,#f6efe6,#efe3d2);}    
+    .app{max-width:1080px;margin:12px auto;padding:12px;}
     .topbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
     .topbar h1{font-size:20px;margin:0 8px 0 0}
-    .pill{padding:6px 10px;border-radius:999px;border:1px solid #ddd;background:#fff}
+    .pill{padding:6px 10px;border-radius:999px;border:1px solid #d9c8b4;background:#fff}
     button{border:0;border-radius:12px;padding:8px 12px;background:#222;color:#fff;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.2)}
-    button.alt{background:#666}
+    button.alt{background:#6b6b6b}
+    button.warn{background:#b23a48}
     button:disabled{opacity:.5;cursor:not-allowed}
     .status{margin-left:auto;display:flex;gap:10px;align-items:center}
 
+    /* layout: board + sidebar */
+    .play{display:grid; grid-template-columns: 1fr 240px; gap:16px; align-items:start}
+
     .board-wrap{position:relative; width:min(90vw, 720px); aspect-ratio: 9/10; margin:auto;}
-    /* Board background */
-    .board{position:absolute; inset:0; background:radial-gradient(120% 120% at 50% 30%, #fff, var(--board-bg)); border-radius:16px; box-shadow: 0 20px 40px rgba(0,0,0,.15), inset 0 0 0 4px #d2c3a5}
+    /* Board background with wood texture */
+    .board{position:absolute; inset:0; border-radius:18px; box-shadow: 0 16px 36px rgba(0,0,0,.18), inset 0 0 0 6px #a9845a; overflow:hidden;
+      background:
+        /* subtle grain */
+        repeating-linear-gradient( 90deg, rgba(0,0,0,.06) 0px, rgba(0,0,0,.06) 1px, transparent 2px, transparent 8px),
+        linear-gradient(180deg, #f6e6c9, #e7c997 40%, #e4bc84 55%, #e2b47b 100%);
+    }
     /* Grid */
     svg.board-grid{position:absolute; inset:16px}
-    /* River label */
-    .river-label{font-size:16px; fill:#5c7080; opacity:.7; font-weight:600}
 
-    /* Piece styling: 3D chips */
+    /* River label styling */
+    .river-label{font-size:20px; font-weight:700; fill:#154c79; opacity:0.9; paint-order: stroke fill; stroke:#fff; stroke-width:2; letter-spacing:4px; font-family: "STKaiti","KaiTi",serif}
+
+    /* Piece styling: 3D wooden chips */
     .piece{position:absolute; width:calc((100% - 32px) / 9 - 2px); aspect-ratio:1; transform: translate(-50%, -50%);
            display:flex; align-items:center; justify-content:center; user-select:none; cursor:grab; z-index:3;
            border-radius:50%;
-           background: radial-gradient(120% 120% at 30% 25%, #fff 0%, #f9f5ef 35%, #f0e6d6 60%, #e4d4b8 100%);
-           box-shadow: 0 2px 0 rgba(0,0,0,.25), 0 8px 16px rgba(0,0,0,.25), inset 0 0 0 2px #d9c7a3, inset 0 8px 20px rgba(0,0,0,.08);
+           background:
+             radial-gradient(120% 120% at 30% 25%, #fff 0%, #f8f1e6 35%, #f0e1c9 60%, #e8d0ad 100%),
+             repeating-linear-gradient( 90deg, rgba(80,42,16,.08) 0 2px, rgba(0,0,0,0) 3px 10px);
+           box-shadow: 0 2px 0 rgba(0,0,0,.25), 0 8px 16px rgba(0,0,0,.25), inset 0 0 0 2px #d3b48b, inset 0 10px 22px rgba(0,0,0,.1);
            transition: transform .08s ease;
     }
     .piece.red{color:var(--red)}
     .piece.black{color:var(--black)}
-    .piece .face{font-size: calc((100vw - 64px)/20 + 16px); font-weight: 800; letter-spacing:1px; text-shadow: 0 1px 0 #fff, 0 2px 0 rgba(0,0,0,.2)}
-    .piece::after{content:""; position:absolute; inset:6%; border-radius:50%; box-shadow: inset 0 0 0 2px rgba(0,0,0,.15), inset 0 10px 20px rgba(0,0,0,.15)}
+    /* 缩小两个字号&确保在棋子内部 */
+    .piece .face{font-size: clamp(16px, calc((100vw - 64px)/28 + 10px), 34px); font-weight: 800; letter-spacing:1px; text-shadow: 0 1px 0 #fff, 0 2px 0 rgba(0,0,0,.2)}
+    .piece::after{content:""; position:absolute; inset:8%; border-radius:50%; box-shadow: inset 0 0 0 2px rgba(0,0,0,.16), inset 0 10px 20px rgba(0,0,0,.15)}
     .piece:active{cursor:grabbing; transform: translate(-50%, -50%) scale(1.04)}
 
     /* Selection ring */
@@ -52,7 +69,7 @@
     .hint.capture{background:#e74c3c}
 
     /* Coordinates help */
-    .coords{position:absolute; left:8px; bottom:8px; font-size:12px; color:#666}
+    .coords{position:absolute; left:8px; bottom:8px; font-size:12px; color:#6e5339}
 
     .panel{max-width:720px;margin:12px auto; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center}
     .tag{padding:4px 8px; background:#fff; border-radius:8px; border:1px solid #eee}
@@ -63,6 +80,25 @@
     /* test log */
     .testbar{max-width:720px;margin:8px auto;display:flex;gap:8px;align-items:center;justify-content:flex-start}
     #testlog{max-width:720px;margin:0 auto; background:#111; color:#9ef59a; padding:8px 10px; border-radius:10px; min-height:0; max-height:180px; overflow:auto; font:12px/1.4 ui-monospace, Menlo, Consolas, Monaco}
+
+    /* Sidebar clocks */
+    .side{background:linear-gradient(180deg,#f7ebd6,#ecd2a8); border:1px solid #d9c2a2; border-radius:14px; padding:12px; box-shadow:0 6px 16px rgba(0,0,0,.12)}
+    .clock{display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,.7); border:1px solid #e6d7bf; padding:10px 12px; border-radius:12px; margin-bottom:10px}
+    .clock .who{font-weight:700}
+    .clock .time{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:18px}
+
+    /* End modal */
+    .modal{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:99}
+    .modal .card{background:linear-gradient(180deg,#fff7ea,#ffe6b7); padding:22px 26px; border-radius:16px; box-shadow:0 16px 36px rgba(0,0,0,.3); text-align:center; border:2px solid #e8c27a}
+    .modal h2{margin:0 0 8px 0; font-size:22px}
+    .modal p{margin:4px 0}
+
+    /* river waves */
+    .wave{opacity:.25}
+
+    /* 弹幕 */
+    .danmu{position:absolute; left:-120px; top:0; font-weight:900; font-size:24px; color:#e73a3a; text-shadow:0 2px 0 #fff, 0 2px 6px rgba(0,0,0,.35); pointer-events:none; z-index:50; white-space:nowrap;}
+    @keyframes fly { from { transform: translateX(0); opacity:1;}  to { transform: translateX(120%); opacity:0.8;} }
   </style>
 </head>
 <body>
@@ -85,6 +121,7 @@
     <button id="newGame">新开局</button>
     <button id="undoBtn" class="alt" disabled>悔棋</button>
     <button id="redoBtn" class="alt" disabled>重做</button>
+    <button id="resignBtn" class="warn">投降</button>
     <button id="runTestsBtn" class="alt">运行测试</button>
     <div class="status">
       <span class="tag" id="turnTag">红方走</span>
@@ -92,26 +129,42 @@
     </div>
   </div>
 
-  <div class="board-wrap" id="boardWrap">
-    <div class="board"></div>
-    <svg class="board-grid" viewBox="0 0 900 1000">
-      <g id="gridLines" stroke="var(--board-line)" stroke-width="2"></g>
-      <!-- River -->
-      <rect x="0" y="450" width="900" height="100" fill="url(#riverGrad)" opacity="0.15" />
-      <defs>
-        <linearGradient id="riverGrad" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stop-color="var(--river)"/>
-          <stop offset="100%" stop-color="#e5f1ff"/>
-        </linearGradient>
-      </defs>
-      <text class="river-label" x="180" y="510">楚河</text>
-      <text class="river-label" x="630" y="510">汉界</text>
-    </svg>
-    <!-- rings and hints container -->
-    <div id="overlay" style="position:absolute; inset:16px;"></div>
-    <!-- pieces container -->
-    <div id="pieces" style="position:absolute; inset:16px;"></div>
-    <div class="coords" id="coords"></div>
+  <div class="play">
+    <div class="board-wrap" id="boardWrap">
+      <div class="board"></div>
+      <svg class="board-grid" viewBox="0 0 900 1000">
+        <defs>
+          <linearGradient id="riverGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#b8eafa"/>
+            <stop offset="100%" stop-color="#a7d8f1"/>
+          </linearGradient>
+          <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#2b4b66" flood-opacity="0.25"/>
+          </filter>
+        </defs>
+        <g id="gridLines" stroke="var(--board-line)" stroke-width="2"></g>
+        <!-- River -->
+        <rect x="0" y="450" width="900" height="100" fill="url(#riverGrad)" opacity="0.9" filter="url(#softShadow)" />
+        <!-- Waves -->
+        <g class="wave" stroke="#ffffff" stroke-width="2" fill="none">
+          <path d="M0 480 C 60 470, 120 490, 180 480 S 300 470, 360 480 S 480 490, 540 480 S 660 470, 720 480 S 840 490, 900 480" />
+          <path d="M0 520 C 60 510, 120 530, 180 520 S 300 510, 360 520 S 480 530, 540 520 S 660 510, 720 520 S 840 530, 900 520" />
+        </g>
+        <text class="river-label" x="160" y="510">楚河</text>
+        <text class="river-label" x="650" y="510">汉界</text>
+      </svg>
+      <!-- rings and hints container -->
+      <div id="overlay" style="position:absolute; inset:16px;"></div>
+      <!-- pieces container -->
+      <div id="pieces" style="position:absolute; inset:16px;"></div>
+      <div class="coords" id="coords"></div>
+    </div>
+    <aside class="side">
+      <div class="clock" id="redClock"><span class="who" style="color:#c0392b">红方</span><span class="time" id="redTime">00:00.0</span></div>
+      <div class="clock" id="blackClock"><span class="who" style="color:#2c3e50">黑方</span><span class="time" id="blackTime">00:00.0</span></div>
+      <div class="clock"><span>上一步用时</span><span class="time" id="lastTime">--</span></div>
+      <p style="margin:.5rem 0 0 0;color:#7a654e">提示：投降将立即结束对局。</p>
+    </aside>
   </div>
 
   <div class="panel">
@@ -124,6 +177,19 @@
   <pre id="testlog" aria-live="polite"></pre>
 </div>
 <div class="toast" id="toast"></div>
+
+<!-- 结束结算弹窗 -->
+<div class="modal" id="endModal" role="dialog" aria-modal="true">
+  <div class="card">
+    <h2 id="endTitle">对局结束</h2>
+    <p id="endMsg">哈哈哈，菜就多练！</p>
+    <p id="endSub" style="opacity:.8"></p>
+    <div style="margin-top:10px; display:flex; gap:8px; justify-content:center">
+      <button id="againBtn">再来一盘</button>
+      <button class="alt" id="closeEnd">关闭</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // --- Utilities ---
@@ -155,21 +221,26 @@ function computeGrid(){
   const g = document.querySelector('#gridLines');
   g.innerHTML='';
   const w=900,h=1000; // viewBox
+  // horizontal lines
   for(let r=0;r<ROWS;r++){
     const y = r* (h/(ROWS-1));
     const line = document.createElementNS('http://www.w3.org/2000/svg','line');
     line.setAttribute('x1',0);line.setAttribute('x2',w);line.setAttribute('y1',y);line.setAttribute('y2',y);
+    line.setAttribute('stroke', 'rgba(68,47,25,0.9)');
     g.appendChild(line);
   }
+  // vertical lines with river gap
   for(let c=0;c<COLS;c++){
     const x = c*(w/(COLS-1));
     // upper part
     const l1 = document.createElementNS('http://www.w3.org/2000/svg','line');
     l1.setAttribute('x1',x); l1.setAttribute('x2',x); l1.setAttribute('y1',0); l1.setAttribute('y2',h/2 - h/(ROWS-1)/2);
+    l1.setAttribute('stroke', 'rgba(68,47,25,0.9)');
     g.appendChild(l1);
     // lower part
     const l2 = document.createElementNS('http://www.w3.org/2000/svg','line');
     l2.setAttribute('x1',x); l2.setAttribute('x2',x); l2.setAttribute('y1',h/2 + h/(ROWS-1)/2); l2.setAttribute('y2',h);
+    l2.setAttribute('stroke', 'rgba(68,47,25,0.9)');
     g.appendChild(l2);
   }
 }
@@ -178,7 +249,7 @@ window.addEventListener('resize', ()=>{
   const w = wrap.clientWidth - BOARD_MARGIN*2;
   cellSizePx = w/(COLS-1);
   renderPieces();
-})
+});
 computeGrid();
 
 // --- Game state ---
@@ -188,8 +259,15 @@ const PIECES = { // type => display char
   k:'将', a:'士', e:'象', r:'车', n:'马', c:'炮', p:'卒'
 };
 
-// Initial FEN-like (columns a-i -> 0-8, rows 0-9 top->bottom with black on top)
-// We'll just build from an array
+// Timers
+const timers = {red:{total:0,last:0}, black:{total:0,last:0}};
+let turnStartTs = performance.now();
+let tickHandle = null;
+function fmt(ms){ const t=Math.max(0,ms); const s=(t/1000)|0; const m=(s/60)|0; const rs=s%60; const ds=Math.floor((t%1000)/100); return `${String(m).padStart(2,'0')}:${String(rs).padStart(2,'0')}.${ds}` }
+function updateTimersUI(){ id('redTime').textContent=fmt(timers.red.total); id('blackTime').textContent=fmt(timers.black.total); id('lastTime').textContent= timers.last? fmt(timers.last):'--'; }
+function startTick(){ if(tickHandle) cancelAnimationFrame(tickHandle); const loop=()=>{ const now=performance.now(); const side = state.turn; const elapsed = now - turnStartTs; if(side===RED) id('redTime').textContent=fmt(timers.red.total + elapsed); else id('blackTime').textContent=fmt(timers.black.total + elapsed); tickHandle=requestAnimationFrame(loop); }; tickHandle=requestAnimationFrame(loop);}    
+
+// Initial FEN-like
 function startPosition(){
   return [
     {t:'r',x:0,y:0,c:BLACK},{t:'n',x:1,y:0,c:BLACK},{t:'e',x:2,y:0,c:BLACK},{t:'a',x:3,y:0,c:BLACK},{t:'k',x:4,y:0,c:BLACK},{t:'a',x:5,y:0,c:BLACK},{t:'e',x:6,y:0,c:BLACK},{t:'n',x:7,y:0,c:BLACK},{t:'r',x:8,y:0,c:BLACK},
@@ -396,6 +474,17 @@ function updateStatus(){
   id('redoBtn').disabled = state.future.length===0;
 }
 
+// 弹幕
+function shoot(text){
+  const dm=document.createElement('div');
+  dm.className='danmu';
+  const h=wrap.clientHeight; const y= Math.random()*(h-40)+10; dm.style.top = y+"px";
+  dm.textContent=text;
+  dm.style.animation = `fly ${1.8 + Math.random()*0.8}s linear forwards`;
+  wrap.appendChild(dm);
+  setTimeout(()=> dm.remove(), 3000);
+}
+
 // --- Interaction ---
 function xyFromClient(clientX, clientY){
   const rect = piecesLayer.getBoundingClientRect();
@@ -454,40 +543,68 @@ function onPieceDown(e){
   document.addEventListener('touchend', upEv);
 }
 
+function endGame(winnerMsg, subMsg){
+  id('endTitle').textContent = winnerMsg || '对局结束';
+  id('endMsg').textContent = '哈哈哈，菜就多练！';
+  id('endSub').textContent = subMsg||'';
+  id('endModal').style.display='flex';
+}
+
 function applyMove(m){
+  // measure time for the side to move (current state.turn)
+  const now=performance.now();
+  const mover = state.turn;
+  const elapsed = now - turnStartTs;
+  timers[mover].total += elapsed; timers.last = elapsed; updateTimersUI();
+  turnStartTs = now; // reset for next side (will be switched below)
+
   // Save history
   state.history.push({pieces: deepClone(state.pieces), turn: state.turn, last: state.lastMove});
   state.future.length=0;
+
+  // detect capture before move for 弹幕
+  const dest = toXY(m.to); const captured = pieceAt(state.pieces, dest.x, dest.y);
+
   // execute
   state.pieces = makeMove(state.pieces, m);
   state.lastMove = m;
+
   // switch turn
   state.turn = (state.turn===RED?BLACK:RED);
   state.selected=null; clearOverlay();
   renderPieces();
+
+  if(captured){ shoot('吃！'); }
+
   // Detect end
   const enemy = state.turn;
   const legal = generateMoves(state.pieces, enemy);
   if(legal.length===0){
-    if(inCheck(state.pieces, enemy)) toast((enemy===RED?'红方':'黑方')+'被将死，'+(enemy===RED?'黑方':'红方')+'胜');
-    else toast('和棋（困毙）');
+    if(inCheck(state.pieces, enemy)) { toast((enemy===RED?'红方':'黑方')+'被将死'); endGame((enemy===RED?'黑方':'红方')+'获胜', '将死'); }
+    else { toast('和棋（困毙）'); endGame('和棋', '困毙'); }
   } else {
     // In single mode, make AI move if it's AI's turn
     if(state.mode==='pvb' && state.turn===BLACK){ setTimeout(aiMove, 200); }
   }
 }
 
-id('newGame').onclick=()=>{ state.pieces=startPosition(); state.turn=RED; state.selected=null; state.lastMove=null; state.history=[]; state.future=[]; renderPieces(); };
+id('newGame').onclick=()=>{ state.pieces=startPosition(); state.turn=RED; state.selected=null; state.lastMove=null; state.history=[]; state.future=[]; timers.red.total=timers.black.total=0; timers.last=0; updateTimersUI(); renderPieces(); turnStartTs=performance.now(); startTick(); };
 
 id('undoBtn').onclick=()=>{
-  if(state.history.length){ const prev=state.history.pop(); state.future.push({pieces:deepClone(state.pieces),turn:state.turn,last:state.lastMove}); state.pieces=prev.pieces; state.turn=prev.turn; state.lastMove=prev.last; state.selected=null; clearOverlay(); renderPieces(); }
+  toast('要脸不？',2000);
+  if(state.history.length){ const prev=state.history.pop(); state.future.push({pieces:deepClone(state.pieces),turn:state.turn,last:state.lastMove}); state.pieces=prev.pieces; state.turn=prev.turn; state.lastMove=prev.last; state.selected=null; clearOverlay(); renderPieces(); turnStartTs=performance.now(); }
 };
 
 id('redoBtn').onclick=()=>{
-  if(state.future.length){ const nxt=state.future.pop(); state.history.push({pieces:deepClone(state.pieces),turn:state.turn,last:state.lastMove}); state.pieces=nxt.pieces; state.turn=nxt.turn; state.lastMove=nxt.last; state.selected=null; clearOverlay(); renderPieces(); }
+  if(state.future.length){ const nxt=state.future.pop(); state.history.push({pieces:deepClone(state.pieces),turn:state.turn,last:state.lastMove}); state.pieces=nxt.pieces; state.turn=nxt.turn; state.lastMove=nxt.last; state.selected=null; clearOverlay(); renderPieces(); turnStartTs=performance.now(); }
 };
 
 id('mode').onchange=(e)=>{ state.mode=e.target.value; toast(state.mode==='pvp'?'已切换为双人同机':'已切换为单人模式'); if(state.mode==='pvb' && state.turn===BLACK){ setTimeout(aiMove, 200);} };
+
+id('resignBtn').onclick=()=>{ const who = state.turn===RED? '红方':'黑方'; toast('机智的选择，投降输一半！', 1800); endGame((who==='红方'?'黑方':'红方')+'获胜', who+'选择了投降'); };
+
+id('againBtn').onclick=()=>{ id('endModal').style.display='none'; id('newGame').click(); };
+ id('closeEnd').onclick=()=>{ id('endModal').style.display='none'; };
 
 // --- Stronger AI: Iterative Deepening + Alpha-Beta + TT + Quiescence ---
 const VALUES={K:10000,A:120,E:120,R:500,N:250,C:350,P:90, k:10000,a:120,e:120,r:500,n:250,c:350,p:90};
@@ -505,7 +622,7 @@ const PST = {
     [ 2,  6, 10, 14, 16, 14, 10,  6,  2],
     [ 4,  8, 12, 16, 18, 16, 12,  8,  4],
     [ 4, 10, 14, 18, 20, 18, 14, 10,  4],
-    [ 6, 12, 18, 22, 24, 22, 18, 12,  6],
+    [ 6,  12, 18, 22, 24, 22, 18, 12,  6],
     [ 8, 14, 20, 26, 28, 26, 20, 14,  8]
   ]
 };
@@ -710,6 +827,30 @@ function runTests(){
     assert(best && toXY(best.to).x===2 && toXY(best.to).y===7, 'AI 能识别并优先吃掉无保护的子');
   })();
 
+  // 7) Advisor must stay within palace and move diagonally (basic legal moves)
+  (function(){
+    const a={t:'A',x:4,y:9,c:'red'}; // center of red palace
+    const pos=[a];
+    const moves=legalMovesForPiece(pos,a,true);
+    const ok = moves.some(m=>m.x===3&&m.y===8) && moves.some(m=>m.x===5&&m.y===8);
+    const bad = moves.some(m=>m.x===4&&m.y===8) || moves.some(m=>m.x===6&&m.y===9);
+    assert(ok && !bad, '仕仅能在九宫内走对角');
+  })();
+
+  // 8) King cannot leave palace
+  (function(){
+    const k={t:'K',x:4,y:9,c:'red'};
+    const pos=[k];
+    const moves=legalMovesForPiece(pos,k,true);
+    const illegal = moves.some(m=>m.x===6&&m.y===9) || moves.some(m=>m.x===4&&m.y===6);
+    assert(!illegal, '帅不可出九宫');
+  })();
+
+  // 9) computeGrid exists (sanity for previous syntax issue)
+  (function(){
+    assert(typeof computeGrid==='function', 'computeGrid 已正确定义');
+  })();
+
   log.textContent = out.join('\n');
   toast('测试完成，详见测试日志');
 }
@@ -718,6 +859,8 @@ id('runTestsBtn').addEventListener('click', runTests);
 
 // init
 renderPieces();
+turnStartTs=performance.now();
+startTick();
 // run smoke tests once on load to catch regressions early
 runTests();
 </script>
